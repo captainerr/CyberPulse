@@ -1,0 +1,16 @@
+# Secrets — never commit real env/secret files (use the .example templates)
+.env
+webui/.env
+worker/.dev.vars
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+webui/dist/
+
+# Wrangler local state (local D1 database, caches)
+worker/.wrangler/
+
+# OS
+.DS_Store

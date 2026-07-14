@@ -1,0 +1,45 @@
+{
+  // KEVMap — single Cloudflare Worker serving the JSON API (/api/*) and the built
+  // React SPA (static assets with SPA fallback). Storage is D1; background work
+  // (catalog refresh, NVD/EPSS enrichment, daily briefing) runs on Cron Triggers.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kevmap",
+  "main": "src/index.js",
+  "compatibility_date": "2026-06-01",
+
+  // Built frontend. Run `npm run build` in ../webui at least once before
+  // `wrangler dev`/`wrangler deploy` so this directory exists.
+  "assets": {
+    "directory": "../webui/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kevmap",
+      // Replace with the id from `wrangler d1 create kevmap` (see DEPLOY.md).
+      // Local dev (`wrangler dev`) ignores this and uses a local SQLite file.
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  "triggers": {
+    // Every 5 minutes: the main tick — refresh the KEV catalog when stale (hourly),
+    // enrich a batch of CVEs from NVD, refresh EPSS scores, and backfill at most one
+    // missing briefing. Budgeted to stay under the free-plan subrequest cap.
+    // Daily 06:00 UTC: the briefing sweep (replaces the old BRIEFING_HOUR env var —
+    // edit the second expression to change the hour).
+    "crons": ["*/5 * * * *", "0 6 * * *"]
+  },
+
+  // Non-secret config. Secrets (SEARCH_API_KEY, GROQ_API_KEY, NVD_API_KEY) are set
+  // with `wrangler secret put <NAME>` in production and worker/.dev.vars locally.
+  "vars": {
+    "GROQ_MODEL": "llama-3.3-70b-versatile"
+  },
+
+  "observability": { "enabled": true }
+}

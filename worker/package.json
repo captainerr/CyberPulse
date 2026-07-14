@@ -1,0 +1,16 @@
+{
+  "name": "kevmap-worker",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --test-scheduled",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply kevmap --local",
+    "db:migrate:remote": "wrangler d1 migrations apply kevmap --remote",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

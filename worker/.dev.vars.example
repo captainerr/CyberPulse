@@ -1,0 +1,24 @@
+# Local-dev secrets for `wrangler dev` — copy to .dev.vars (gitignored).
+# In production set these with `wrangler secret put <NAME>` instead.
+
+# Serper API key (https://serper.dev) - required for /api/links
+SEARCH_API_KEY=your_serper_key_here
+
+# NVD API key (https://nvd.nist.gov/developers/request-an-api-key) - optional,
+# raises the NVD rate limit so enrichment fills in much faster
+NVD_API_KEY=your_nvd_key_here
+
+# Groq API key (https://console.groq.com/keys) - required for /api/briefing and /api/hunting
+GROQ_API_KEY=your_groq_key_here
+
+# Optional overrides (defaults are baked into the worker):
+# GROQ_MODEL=llama-3.3-70b-versatile
+# KEV_CATALOG_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+# NVD_API_URL=https://services.nvd.nist.gov/rest/json/cves/2.0
+# SEARCH_API_URL=https://google.serper.dev/search
+# MASTODON_INSTANCE=https://mastodon.social
+# SOCIAL_TAGS=infosec,threatintel,malware,ransomware,vulnerability
+# BREACHES_FEEDS=comma,separated,rss,urls
+# BREACHES_FILTER=comma,separated,keywords
+# BREACHES_EXCLUDE=comma,separated,keywords
+# TRUSTED_BREACH_SOURCES=comma,separated,names
