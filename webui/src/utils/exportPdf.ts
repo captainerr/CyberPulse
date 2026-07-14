@@ -3,10 +3,10 @@ import autoTable from 'jspdf-autotable';
 import type { KevEntry } from '../models/kev';
 import type { NewsLinksEntry } from '../hooks/useNewsLinks';
 
-// Report brand colors
-const BRAND_TEAL = '#00C8B4';
-const BRAND_DARK = '#1A2744';
-const BRAND_LIGHT_ROW = '#F0FDFB';
+// Report brand colors (CyberPulse terminal identity; PDF body stays paper-white)
+const BRAND_GREEN = '#00c534';
+const BRAND_DARK = '#0b120b';
+const BRAND_LIGHT_ROW = '#f2faf2';
 
 const SEV_COLORS: Record<string, [number, number, number]> = {
   CRITICAL: [220, 38,  38 ],
@@ -65,23 +65,23 @@ export function generateKevPdf(
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const [dr, dg, db] = hexToRgb(BRAND_DARK);
-  const [tr, tg, tb] = hexToRgb(BRAND_TEAL);
+  const [tr, tg, tb] = hexToRgb(BRAND_GREEN);
 
   const drawHeader = (pageNum: number) => {
     // Teal top bar
     doc.setFillColor(tr, tg, tb);
     doc.rect(0, 0, pageW, 18, 'F');
 
-    // Logo in top bar (white)
-    doc.setTextColor(255, 255, 255);
+    // Logo in top bar (terminal prompt style, black on green)
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text('KEVMap', 10, 12);
+    doc.setFont('courier', 'bold');
+    doc.text('> CyberPulse', 10, 12);
 
     // Report title
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
-    const title = 'KEV Intelligence Report';
+    const title = 'CyberPulse KEV Intelligence Report';
     const titleW = doc.getTextWidth(title);
     doc.text(title, pageW - titleW - 10, 12);
 
@@ -105,7 +105,7 @@ export function generateKevPdf(
     doc.setTextColor(180, 200, 210);
     doc.setFontSize(6.5);
     doc.setFont('helvetica', 'normal');
-    doc.text('KEVMap  |  Confidential — for authorized use only', 10, pageH - 2.5);
+    doc.text('CyberPulse  |  Confidential — for authorized use only', 10, pageH - 2.5);
     const ts = 'Source: CISA KEV · NVD';
     doc.text(ts, pageW - doc.getTextWidth(ts) - 10, pageH - 2.5);
   };
@@ -186,5 +186,5 @@ export function generateKevPdf(
   });
 
   const date = new Date().toISOString().slice(0, 10);
-  doc.save(`kevmap-kev-report-${date}.pdf`);
+  doc.save(`cyberpulse-kev-report-${date}.pdf`);
 }

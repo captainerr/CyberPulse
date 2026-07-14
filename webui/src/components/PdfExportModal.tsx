@@ -42,11 +42,11 @@ export const PdfExportModal: React.FC<Props> = ({ entryCount, hasNewsLinks, onGe
       <div className="pdf-modal" onClick={(e) => e.stopPropagation()}>
         <div className="pdf-modal-header">
           <div className="pdf-modal-logo">
-            <span className="pdf-logo-brand">KEVMap</span>
+            <span className="pdf-logo-brand">&gt; CyberPulse</span>
           </div>
           <h2 id="pdf-modal-title" className="pdf-modal-title">Generate PDF Report</h2>
           <p className="pdf-modal-subtitle">
-            Select the columns to include in your <em>KEV Intelligence Report</em>.
+            Select the columns to include in your <em>CyberPulse KEV Intelligence Report</em>.
             Exporting {entryCount} {entryCount === 1 ? 'entry' : 'entries'}.
           </p>
         </div>

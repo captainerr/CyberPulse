@@ -84,7 +84,7 @@ export const BriefingPage: React.FC = () => {
         ) : briefing ? (
           <>
             <div className="print-masthead">
-              <span className="print-masthead-brand">KEVMap</span>
+              <span className="print-masthead-brand">CyberPulse</span>
               <span className="print-masthead-title">Cybersecurity Analysts Briefing — {briefing.date}</span>
             </div>
 

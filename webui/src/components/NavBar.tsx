@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext';
 
 const LINKS = [
   { to: '/', label: 'Command Center', end: true },
@@ -11,7 +10,6 @@ const LINKS = [
 ];
 
 export const NavBar: React.FC = () => {
-  const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const location = useLocation();
 
@@ -30,6 +28,9 @@ export const NavBar: React.FC = () => {
       >
         {open ? '✕' : '☰'}
       </button>
+      <NavLink to="/" className="nav-brand" aria-label="CyberPulse home">
+        root@cyberpulse:~$<span className="nav-brand-cursor" aria-hidden="true" />
+      </NavLink>
       <div id="nav-links" className={`nav-links${open ? ' nav-links-open' : ''}`}>
         {LINKS.map((l) => (
           <NavLink
@@ -42,13 +43,6 @@ export const NavBar: React.FC = () => {
           </NavLink>
         ))}
       </div>
-      <button
-        onClick={toggleTheme}
-        className="theme-toggle"
-        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      >
-        {theme === 'dark' ? '☀️' : '🌙'}
-      </button>
     </nav>
   );
 };

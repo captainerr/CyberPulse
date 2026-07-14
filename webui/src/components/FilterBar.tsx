@@ -134,7 +134,7 @@ const VendorDropdown: React.FC<{
               {v}
             </label>
           ))}
-          {filtered.length === 0 && <div className="sev-dropdown-item" style={{ color: 'var(--text-muted)' }}>No matches</div>}
+          {filtered.length === 0 && <div className="sev-dropdown-item" style={{ color: 'var(--muted)' }}>No matches</div>}
         </div>
       )}
     </div>

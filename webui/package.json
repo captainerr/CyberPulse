@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/jetbrains-mono": "^5.2.8",
     "github-slugger": "^2.0.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
