@@ -19,11 +19,16 @@
     {
       "binding": "DB",
       "database_name": "kevmap",
-      // Replace with the id from `wrangler d1 create kevmap` (see DEPLOY.md).
       // Local dev (`wrangler dev`) ignores this and uses a local SQLite file.
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "c65b5d71-e6cf-4f5d-9cbd-4f9d27be9c66",
       "migrations_dir": "migrations"
     }
+  ],
+
+  // Provisions DNS + TLS for this hostname automatically (inversehanlon.com is
+  // already a Cloudflare-managed zone on this account).
+  "routes": [
+    { "pattern": "cyberpulse.inversehanlon.com", "custom_domain": true }
   ],
 
   "triggers": {
