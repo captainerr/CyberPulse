@@ -7,7 +7,7 @@ import {
   countIdsNeedingFetch, filterIdsNeedingFetch, addPriority, getDbStats,
   getBriefing, getBriefingDates, getHuntingQueries, getHuntingQueryDates,
 } from './db.js';
-import { processNvdBatch, refreshEpss, REFRESH_INTERVAL_MS } from './nvd.js';
+import { processNvdBatch, refreshEpss, REFRESH_INTERVAL_MS, NO_SCORE_REFRESH_INTERVAL_MS } from './nvd.js';
 import { getBreachItems, makeIsBreachRelated, getSocialItems } from './feeds.js';
 import { backfillMissingBriefings, ensureTodayBriefing, cutoffDate } from './briefing.js';
 
@@ -139,7 +139,7 @@ async function handleApi(request, env, ctx, url) {
     // array would be a cheap DoS. The dashboard never prioritizes more at once.
     if (cveIds.length > 500) return json({ error: 'cveIds exceeds maximum of 500' }, 400);
     const valid = cveIds.filter((id) => typeof id === 'string' && /^CVE-\d{4}-\d+$/i.test(id));
-    const needed = await filterIdsNeedingFetch(env.DB, valid, REFRESH_INTERVAL_MS);
+    const needed = await filterIdsNeedingFetch(env.DB, valid, REFRESH_INTERVAL_MS, NO_SCORE_REFRESH_INTERVAL_MS);
     await addPriority(env.DB, needed);
     // Start filling the most urgent ones right now (bounded); the cron tick
     // drains the rest of the priority table on its normal cadence.
@@ -150,7 +150,7 @@ async function handleApi(request, env, ctx, url) {
   if (method === 'GET' && pathname === '/api/status') {
     const db = await getDbStats(env.DB);
     const catalogTotal = await getCatalogCount(env.DB);
-    const pending = await countIdsNeedingFetch(env.DB, REFRESH_INTERVAL_MS);
+    const pending = await countIdsNeedingFetch(env.DB, REFRESH_INTERVAL_MS, NO_SCORE_REFRESH_INTERVAL_MS);
     return json({
       seeder: {
         running: pending > 0,

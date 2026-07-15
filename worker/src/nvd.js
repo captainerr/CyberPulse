@@ -10,6 +10,10 @@ import {
 const DEFAULT_NVD_API_URL = 'https://services.nvd.nist.gov/rest/json/cves/2.0';
 // Re-fetch a cached score once it's older than this (NVD re-analyzes scores over time).
 export const REFRESH_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
+// A newly-published CVE is often fetched before NVD analysts have scored it
+// (vulnStatus "Received", no CVSS yet). That's cheap and valuable to retry much
+// sooner than the general 7-day window — a few hours usually closes the gap.
+export const NO_SCORE_REFRESH_INTERVAL_MS = 3 * 60 * 60 * 1000;
 // EPSS scores update daily; refresh once per day is sufficient.
 export const EPSS_REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const EPSS_API_URL = 'https://api.first.org/data/v1/epss';
@@ -81,7 +85,7 @@ export async function processNvdBatch(env, limit) {
   const spacing = key ? 700 : 6500;
   const cap = key ? limit : Math.min(limit, 4);
 
-  const ids = await getIdsNeedingFetch(env.DB, REFRESH_INTERVAL_MS, cap);
+  const ids = await getIdsNeedingFetch(env.DB, REFRESH_INTERVAL_MS, NO_SCORE_REFRESH_INTERVAL_MS, cap);
   if (!ids.length) return 0;
 
   const results = [];

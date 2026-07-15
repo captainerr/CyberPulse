@@ -232,52 +232,67 @@ export async function getCatalogEntries(db, sinceDate, untilDate = null) {
 }
 
 /**
- * Catalog CVE IDs missing enrichment or older than the refresh window —
- * user-prioritized ids first (see /api/nvd/prioritize), then newest first.
+ * Catalog CVE IDs missing enrichment, older than the refresh window, or fetched
+ * but still missing a CVSS score and older than the shorter no-score window —
+ * a newly-published CVE often lands at NVD before analysts have scored it, and
+ * that's worth a much quicker retry than the general 7-day re-analysis check.
+ * User-prioritized ids first (see /api/nvd/prioritize), then newest first.
  */
-export async function getIdsNeedingFetch(db, refreshIntervalMs, limit) {
+export async function getIdsNeedingFetch(db, refreshIntervalMs, noScoreRefreshIntervalMs, limit) {
   const cutoff = Date.now() - refreshIntervalMs;
+  const noScoreCutoff = Date.now() - noScoreRefreshIntervalMs;
   const { results } = await db
     .prepare(`
       SELECT c.cve_id
       FROM kev_catalog c
       LEFT JOIN cve_enrichment e ON e.cve_id = c.cve_id
       LEFT JOIN nvd_priority p ON p.cve_id = c.cve_id
-      WHERE e.cve_id IS NULL OR e.cached_at < ?
+      WHERE e.cve_id IS NULL
+         OR e.cached_at < ?
+         OR (e.base_score IS NULL AND e.cached_at < ?)
       ORDER BY (p.cve_id IS NOT NULL) DESC, c.date_added DESC
       LIMIT ?
     `)
-    .bind(cutoff, limit)
+    .bind(cutoff, noScoreCutoff, limit)
     .all();
   return results.map((r) => r.cve_id);
 }
 
-export async function countIdsNeedingFetch(db, refreshIntervalMs) {
+export async function countIdsNeedingFetch(db, refreshIntervalMs, noScoreRefreshIntervalMs) {
   const cutoff = Date.now() - refreshIntervalMs;
+  const noScoreCutoff = Date.now() - noScoreRefreshIntervalMs;
   const row = await db
     .prepare(`
       SELECT COUNT(*) AS n
       FROM kev_catalog c
       LEFT JOIN cve_enrichment e ON e.cve_id = c.cve_id
-      WHERE e.cve_id IS NULL OR e.cached_at < ?
+      WHERE e.cve_id IS NULL
+         OR e.cached_at < ?
+         OR (e.base_score IS NULL AND e.cached_at < ?)
     `)
-    .bind(cutoff)
+    .bind(cutoff, noScoreCutoff)
     .first();
   return row?.n ?? 0;
 }
 
-/** Of the given ids, the ones with no enrichment yet or enrichment older than the window. */
-export async function filterIdsNeedingFetch(db, cveIds, refreshIntervalMs) {
+/**
+ * Of the given ids, the ones with no enrichment yet, enrichment older than the
+ * window, or fetched but still missing a score (see getIdsNeedingFetch).
+ */
+export async function filterIdsNeedingFetch(db, cveIds, refreshIntervalMs, noScoreRefreshIntervalMs) {
   const cutoff = Date.now() - refreshIntervalMs;
+  const noScoreCutoff = Date.now() - noScoreRefreshIntervalMs;
   const needs = [];
   for (let i = 0; i < cveIds.length; i += 90) {
     const chunk = cveIds.slice(i, i + 90);
     const { results } = await db
       .prepare(`
         SELECT cve_id FROM cve_enrichment
-        WHERE cve_id IN (${chunk.map(() => '?').join(',')}) AND cached_at >= ?
+        WHERE cve_id IN (${chunk.map(() => '?').join(',')})
+          AND cached_at >= ?
+          AND (base_score IS NOT NULL OR cached_at >= ?)
       `)
-      .bind(...chunk, cutoff)
+      .bind(...chunk, cutoff, noScoreCutoff)
       .all();
     const fresh = new Set(results.map((r) => r.cve_id));
     needs.push(...chunk.filter((id) => !fresh.has(id)));
